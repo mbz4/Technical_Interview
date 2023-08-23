@@ -98,7 +98,7 @@ class DiffGNSSProcessor: # class definition
         U, V = U[:min_length], V[:min_length]
         X, Y = X[:min_length], Y[:min_length]
         ax.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=8, color='b', alpha=0.5, width=0.0045, headwidth=2.8, headlength=3.8, headaxislength=3.5)
-        ax.set_title("Speed & Heading on Moving Plane")
+        ax.set_title("Speed & Yaw on Moving Plane")
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
 
@@ -138,7 +138,7 @@ class DiffGNSSProcessor: # class definition
         # for i, (angle, radius) in enumerate(zip(angles, radii)): # tried annotations for clarity but it was too cluttered
         #     if i % 5 == 0:
         #         ax.annotate(f"{radius:.2f} m/s", (angle, radius), textcoords="offset points", xytext=(0,5), ha='center', fontsize=8)   
-        ax.set_title("Heading [°] / Velocity [m/s]")
+        ax.set_title("Yaw [°] / Velocity [m/s]")
         ax.grid(True)
         ax.set_theta_zero_location("S")
         ax.set_theta_direction(-1)
