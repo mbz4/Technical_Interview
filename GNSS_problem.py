@@ -1,191 +1,163 @@
-#/usr/bin/env python3
-import math
+#/usr/bin/env python3 
+
+import csv, time, matplotlib
 import matplotlib.pyplot as plt
-import csv
 import numpy as np
-import datetime
-
-data = [(1621693264.0155628, 9521, -35074, 3.92, -1.35),
-(1621693264.1979840, 9450, -34970, 3.93, -1.22),
-(1621693264.4237902, 9365, -34853, 3.85, -1.24),
-(1621693264.6384845, 9291, -34759, 3.85, -1.12),
-(1621693264.8448036, 9211, -34649, 3.77, -0.99),
-(1621693265.0378000, 9140, -34547, 3.70, -0.90),
-(1621693265.2572992, 9071, -34444, 3.70, -0.70),
-(1621693265.4631655, 8988, -34334, 3.59, -0.55),
-(1621693265.6851535, 8917, -34231, 3.59, -0.49),
-(1621693265.8768837, 8839, -34126, 3.56, -0.46),
-(1621693266.1154845, 8767, -34021, 3.66, -0.38),
-(1621693266.2963840, 8689, -33914, 3.78, -0.44),
-(1621693266.5014370, 8614, -33808, 3.74, -0.53),
-(1621693266.7386210, 8540, -33704, 3.73, -0.75),
-(1621693266.9416296, 8452, -33590, 3.66, -0.91),
-(1621693267.1762938, 8392, -33494, 3.55, -0.97),
-(1621693267.3843954, 8326, -33399, 3.63, -1.00),
-(1621693267.5642680, 8255, -33292, 3.77, -0.89),
-(1621693267.7781956, 8176, -33189, 3.90, -1.00),
-(1621693268.0044500, 8112, -33099, 3.88, -1.24),
-(1621693268.2188272, 8044, -32986, 3.82, -1.58),
-(1621693268.4177945, 7969, -32892, 3.75, -1.95),
-(1621693268.6272150, 7906, -32804, 3.77, -2.05),
-(1621693268.8552556, 7835, -32705, 3.80, -1.95),
-(1621693269.0375066, 7759, -32616, 3.81, -1.72),
-(1621693269.2567391, 7677, -32504, 3.88, -1.31),
-(1621693269.4572983, 7593, -32391, 3.98, -1.04),
-(1621693269.8621871, 7453, -32193, 4.07, -1.17),
-(1621693270.0862586, 7386, -32103, 4.06, -1.31),
-(1621693270.2752004, 7301, -31996, 4.06, -1.56)]
+matplotlib.use('Qt5Agg')
 
 
-from multiprocessing import Pool
+def time_it(func):
+    def wrapper(self, *args, **kwargs):
+        start = time.perf_counter()
+        result = func(self, *args, **kwargs)
+        end = time.perf_counter()
+        print(f'{func.__name__} executed in {1000*(end - start):.03f} ms.')
+        return result
+    return wrapper
 
-def apply_multiprocessing(func, data):
-    with Pool(processes=8) as pool:  # you can adjust the number of processes as per your CPU cores
-        result = pool.map(func, data)
-    return result
+class DiffGNSSProcessor: # class definition
+    def __init__(self, file_path): # constructor
+        self.data = []
+        self.load_data(file_path)
+        self.projected_points = []
+        self.headings = []
+        self.velocities = []
+        self.normalized_velocities = []
+        self.output_data = []
 
+    def load_data(self, file_path): # load data from csv file
+        with open(file_path, 'r') as f:
+            reader = csv.reader(f)
+            next(reader) # Skip the header row
+            for row in reader: # Convert the data in the row to their appropriate types and add to the data list
+                time_s = float(row[0]) # convert to float (need to perform ops on it later, cant use strings)
+                x_mm = int(row[1]) # convert to int
+                y_mm = int(row[2])
+                roll_deg = float(row[3])
+                pitch_deg = float(row[4])
+                data_tuple = (time_s, x_mm, y_mm, roll_deg, pitch_deg) 
+                self.data.append(data_tuple) # add tuple to list     
+    
+    def calculate_projection(self): # calculate projection of GNSS module on moving plane
+        for point in self.data:
+            x_mm, y_mm, roll_deg, pitch_deg = point[1], point[2], point[3], point[4] # unpack data
+            x_offset = 1500 * np.tan(np.radians(roll_deg)) # 1500 mm is the distance from the GNSS module to the center of the vehicle
+            y_offset = 1500 * np.tan(np.radians(pitch_deg)) 
+            self.projected_points.append((x_mm + x_offset, y_mm + y_offset)) # add offset to x and y values, then add projected point to list
+    
+    def calculate_heading(self): # calculate heading between two points
+        for i in range(1, len(self.data)): # start at 1 b/c we need to calculate heading between two points
+            delta_x = self.projected_points[i][0] - self.projected_points[i-1][0] # calculate delta x and y
+            delta_y = self.projected_points[i][1] - self.projected_points[i-1][1] 
+            self.headings.append(np.degrees(np.arctan2(delta_y, delta_x))) # calculate heading & add it to list
+    
+    def calculate_velocity(self):
+        for i in range(len(self.data) - 1): # start at 0 b/c we need to calculate velocity between two points
+            dx = self.data[i+1][1] - self.data[i][1] # calculate delta x and y
+            dy = self.data[i+1][2] - self.data[i][2]
+            dt = self.data[i+1][0] - self.data[i][0] # calculate delta t
+            vi = np.sqrt(dx**2 + dy**2) / dt # calculate velocity
+            self.velocities.append(vi) # add velocity to list
+        self.normalized_velocities = [v/(max(self.velocities)) for v in self.velocities] # normalize all velocities
 
-def calculate_projection(data):
-    projected_points = []
-    for point in data:
-        x_mm, y_mm, roll_deg, pitch_deg = point[1], point[2], point[3], point[4] # unpack data
+    def save_to_csv(self): # save data to csv file
+        with open('output_data.csv', 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, 
+                                    fieldnames = ['timestamp',
+                                                  'x_mm', 
+                                                  'y_mm', 
+                                                  'roll_deg', 
+                                                  'pitch_deg', 
+                                                  'heading_deg', 
+                                                  'velocity']) # create writer object
+            writer.writeheader() # write header
+            for i in range(len(self.data) - 1):
+                writer.writerow({
+                    'timestamp': self.data[i][0],
+                    'x_mm': self.data[i][1],
+                    'y_mm': self.data[i][2],
+                    'roll_deg': self.data[i][3],
+                    'pitch_deg': self.data[i][4],
+                    'heading_deg': self.headings[i],
+                    'velocity': self.velocities[i]}) # write data to csv file
+    
+    @time_it
+    def process_data(self): # process data
+        self.data = sorted(self.data, key=lambda x: x[0])  # sort by timestamps
+        self.calculate_projection()
+        self.calculate_heading()
+        self.calculate_velocity()
+        self.save_to_csv()
+
+    def plot_quiver(self, ax):
+        U = np.cos(np.radians(self.headings))
+        V = np.sin(np.radians(self.headings))
         
-        x_offset = 1500 * math.tan(math.radians(roll_deg)) # 1500 mm is the distance from the GNSS module to the center of the vehicle
-        y_offset = 1500 * math.tan(math.radians(pitch_deg)) 
+        # Fixing the X and Y extraction
+        X = [point[0] for point in self.projected_points]
+        Y = [point[1] for point in self.projected_points]
+
+        # Ensure lengths match
+        min_length = min(len(U), len(X))  # get the minimum length
+        U, V = U[:min_length], V[:min_length]
+        X, Y = X[:min_length], Y[:min_length]
+
+        ax.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=0.009, color='b')
+        ax.set_title("Quiver Plot with Projections")
+        ax.set_xlabel("X [m]")
+        ax.set_ylabel("Y [m]")
+
+    def plot_time_series(self, ax):
+        times = [point[0] for point in self.data]
+        roll = [point[3] for point in self.data]
+        pitch = [point[4] for point in self.data]
+        ax.plot(times, roll, label="Roll", color="blue")
+        ax.plot(times, pitch, label="Pitch", color="red")
+        ax.set_title("Roll & Pitch / Time")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Angle [°]")
+        ax.legend() 
+
+    def plot_velocity_vs_time(self, ax):
+        times = [point[0] for point in self.data] # get times
+        smoothed_velocities = np.convolve(self.velocities, np.ones(5)/5, mode='valid') # simple moving average to smoothen the velocities
+        truncated_times = times[len(times) - len(smoothed_velocities):] # truncate times to match the length of the smoothed velocities
+        ax.plot(truncated_times, smoothed_velocities, label="Velocity", color="purple")
+        ax.set_title("Velocity / Time")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Velocity [m/s]")
+  
+    def plot_polar(self, ax):
+        angles = np.radians(self.headings)
+        radii = self.normalized_velocities
+        ax.scatter(angles, radii, color='g', s=5)  # scatter plot with small points
+        ax.set_title("Heading & Velocity")
+        ax.grid(True)
+        ax.set_theta_zero_location("N")  # Set 0 degrees to the top
+        ax.set_theta_direction(-1)  # Clockwise direction
+    
+    def visualize_data(self):
+
+        fig = plt.figure(figsize=(14, 8))
+        ax1 = fig.add_subplot(2, 2, 1)
+        ax2 = fig.add_subplot(2, 2, 2, projection='polar')
+        ax3 = fig.add_subplot(2, 2, 3)
+        ax4 = fig.add_subplot(2, 2, 4)
+
+        self.plot_quiver(ax1)
+        self.plot_polar(ax2)
+        self.plot_time_series(ax3)
+        self.plot_velocity_vs_time(ax4)
         
-        x_projected = x_mm + x_offset # add offset to x and y values
-        y_projected = y_mm + y_offset
-        
-        projected_points.append((x_projected, y_projected)) # add projected point to list
-    return projected_points
+        plt.draw()
+        manager = plt.get_current_fig_manager()
+        manager.window.showMaximized()
+        plt.tight_layout()
+        plt.show()
+    
+    def run(self):
+        self.process_data()
+        self.visualize_data()
 
-def calculate_heading(data, projected_points):
-    headings = [] # list of headings
-    for i in range(1, len(data)): # start at 1 b/c we need to calculate heading between two points
-        
-        delta_x = projected_points[i][0] - projected_points[i-1][0] # calculate delta x and y
-        delta_y = projected_points[i][1] - projected_points[i-1][1] 
-        
-        heading = math.degrees(math.atan2(delta_y, delta_x)) # calculate heading
-        
-        headings.append(heading) # add heading to list
-    return headings # return list of headings
-
-def calculate_velocity(data):
-    velocities = []
-    for i in range(len(data) - 1):
-        dx = data[i+1][1] - data[i][1]
-        dy = data[i+1][2] - data[i][2]
-        dt = data[i+1][0] - data[i][0]
-        
-        vi = np.sqrt(dx**2 + dy**2) / dt
-        velocities.append(vi)
-    return velocities
-
-def calculate_norm_velocity(data):
-    velocities = []
-    for i in range(len(data) - 1):
-        dx = data[i+1][1] - data[i][1]
-        dy = data[i+1][2] - data[i][2]
-        dt = data[i+1][0] - data[i][0]
-        vi = np.sqrt(dx**2 + dy**2) / dt
-        velocities.append(vi)
-    max_velocity = max(velocities) # find max vel
-    return [v/max_velocity for v in velocities] # normalize all velocities
-
-def save_to_csv(data, headings, velocities):
-    with open('output_data.csv', 'w', newline='') as csvfile:
-        fieldnames = ['timestamp', 'x_mm', 'y_mm', 'roll_deg', 'pitch_deg', 'heading_deg', 'velocity']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for i in range(len(data) - 1):
-            writer.writerow({
-                'timestamp': data[i][0],
-                'x_mm': data[i][1],
-                'y_mm': data[i][2],
-                'roll_deg': data[i][3],
-                'pitch_deg': data[i][4],
-                'heading_deg': headings[i],
-                'velocity': velocities[i]})
-
-
-def plot_quiver(data, headings, velocities):
-    x = [point[1] for point in data[:-1]]
-    y = [point[2] for point in data[:-1]]
-    u = np.cos(np.radians(headings)) * velocities # convert headings to radians
-    v = np.sin(np.radians(headings)) * velocities # quiver length is proportional to velocity
-
-    plt.figure(figsize=(10, 7))
-    plt.quiver(x, y, u, v, angles='xy', scale_units='xy', scale=2, color='m', width=0.003, alpha=0.5)
-    plt.scatter(x, y, color='b', alpha=0.2, edgecolors='g')
-    plt.title("Quiver Plot showing the Heading and Velocity")
-    plt.xlabel("X (mm)")
-    plt.ylabel("Y (mm)")
-    plt.show()
-
-
-def plot_time_series(data):
-    times = [point[0] for point in data]
-    roll = [point[3] for point in data]
-    pitch = [point[4] for point in data]
-
-    plt.figure(figsize=(10, 7))
-    plt.plot(times, roll, label="Roll (degrees)", color="blue")
-    plt.plot(times, pitch, label="Pitch (degrees)", color="red")
-    plt.title("Time-Series plot of Roll and Pitch")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Degrees")
-    plt.legend()
-    plt.show()
-
-def plot_histogram(headings):
-    plt.figure(figsize=(10, 7))
-    plt.hist(headings, bins=20, color="skyblue", edgecolor="black")
-    plt.title("Histogram of Headings (Yaw)")
-    plt.xlabel("Heading (degrees)")
-    plt.ylabel("Frequency")
-    plt.show()
-
-def plot_projected_points(x_projected_values, y_projected_values):
-    plt.scatter(x_projected_values, y_projected_values, '-o')
-    plt.title("GNSS Module Projection on Moving Plane")
-    plt.xlabel("x (mm)")
-    plt.ylabel("y (mm)")
-    plt.grid(True)
-    plt.show()
-
-def plot_headings(headings):    
-    plt.plot(headings)
-    plt.title("Vehicle's Heading")
-    plt.xlabel("Time (index)")
-    plt.ylabel("Heading (degrees)")
-    plt.grid(True)
-    plt.show()
-
-def plot_velocity_vs_time(data, velocities):
-    timestamps = [point[0] for point in data[:-1]] # exclude last timestamp (no velocity info there)
-    times = [datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S') for ts in timestamps] # UNIX time ==> datetime (x-axis labels)
-
-    plt.figure(figsize=(12, 6))
-    plt.plot(times, velocities, '-o', color='b', markersize=4)
-    plt.xticks(rotation=45) # rotate x-axis labels (might help w/ readability)
-    plt.title("Velocity vs. Time")
-    plt.xlabel("Time")
-    plt.ylabel("Normalized Velocity")
-    plt.tight_layout() # prevent x-axis label from being cut off :)
-    plt.show()
-
-projected_points = calculate_projection(data)
-headings = calculate_heading(data, projected_points)
-velocities = calculate_velocity(data)
-norm_velocities = calculate_norm_velocity(data)
-save_to_csv(data, headings, velocities)
-plot_velocity_vs_time(data, velocities)
-
-x_projected_values = [point[0] for point in projected_points]
-y_projected_values = [point[1] for point in projected_points]
-
-# plot_quiver(data, headings, norm_velocities)
-plot_quiver(data, headings, velocities)
-# plot_time_series(data)
-# plot_histogram(headings)
+if __name__ == "__main__":
+    DiffGNSSProcessor("input_data.csv").run()
