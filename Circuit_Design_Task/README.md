@@ -48,9 +48,27 @@ Uses a transformer to isolate the input from the output and can produce multiple
 f. Cuk Converter:
 A type of DC-DC converter that has both buck and boost operations with non-inverted output.
 
+
+```mermaid
+mindmap TB
+  subgraph DC_Converters [DC Voltage Converter Types]
+    subgraph StepDown [Step-Down]
+      Buck[Buck Converter]
+    end
+    subgraph StepUp [Step-Up]
+      Boost[Boost Converter]
+    end
+    BuckBoost[Buck-Boost Converter]
+    Linear[Linear Voltage Regulators]
+    Flyback[Flyback Converter]
+    Cuk[Cuk Converter]
+  end
+```
+
 ---
 
 ## 2. Connecting a discrete NPN inductive sensor to an MCU:
+
 An NPN inductive sensor will go "low" or provide a connection to ground when activated.
 
 Solution:
@@ -72,14 +90,14 @@ Just before the "MCU Input Pin", place a diode in parallel pointing towards "+V"
 Also, just before the "MCU Input Pin", you can place a small capacitor to ground to filter noise if necessary.
 
 ```mermaid
-graph TD
-    V[V+] --> R[Rpull-up]
-    R --> MCUInput[MCU Input]
-    SensorOutput -->|Sensor Output| MCUInput
-    DiodeCathode[|] --> MCUInput
-    DiodeAnode --> GND
-    V --> Sensor[Sensor Vcc]
-    GND --> SensorGND[Sensor GND]
+mindmap TB
+  subgraph NPN_Sensor [NPN Inductive Sensor]
+    Powering[Powering]
+    Output[Output to MCU pin]
+    Pullup[Pull-up Resistor]
+    DiodeProtection[Diode for Back EMF]
+    NoiseFiltering[Capacitor for Noise Filtering]
+  end
 ```
 
 ---
@@ -95,6 +113,18 @@ Gate driver: Use a dedicated gate driver IC to drive the MOSFETs. This ensures f
 Protection: Include flyback diodes across each MOSFET to protect against back EMF from the motor.
 PWM Control: To control the speed of the motor, a PWM signal can be applied to the gate driver. The MCU can generate this PWM signal.
 Mechanical design: Ensure the H-bridge circuit has proper heatsinking as high current applications generate a lot of heat.
+
+```mermaid
+mindmap TB
+  subgraph Motor_Drive [48V 500W DC Motor Drive]
+    Hbridge[H-bridge Configuration]
+    MOSFETs[MOSFET Selection]
+    GateDriver[Gate Driver IC]
+    Protection[Flyback Diodes]
+    PWM[PWM Control for Speed]
+    Heat[Heat Sinking]
+  end
+```
 
 ---
 
@@ -115,3 +145,15 @@ Signal Conditioning: To improve measurement accuracy, consider adding an op-amp 
 Protection: Add a capacitor close to the power pins of the sensor to filter out noise.
 
 Interpretation: In software, readings above Vcc/2 imply one direction, while readings below Vcc/2 imply the opposite direction.
+
+```mermaid
+mindmap TB
+  subgraph Analog_Sensor [Ratiometric Bidirectional Analog Sensor]
+    Power[Power with MCU's Vcc]
+    ADCOutput[Output to MCU ADC]
+    Bias[Voltage Bias at Vcc/2]
+    Buffer[Op-amp Buffer]
+    CapacitorProtection[Capacitor for Noise]
+    Interpretation[Software Interpretation]
+  end
+```
