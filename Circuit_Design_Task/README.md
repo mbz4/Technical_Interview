@@ -50,7 +50,7 @@ A type of DC-DC converter that has both buck and boost operations with non-inver
 
 
 ```mermaid
-mindmap TB
+mindmap
   subgraph DC_Converters [DC Voltage Converter Types]
     subgraph StepDown [Step-Down]
       Buck[Buck Converter]
@@ -62,7 +62,6 @@ mindmap TB
     Linear[Linear Voltage Regulators]
     Flyback[Flyback Converter]
     Cuk[Cuk Converter]
-  end
 ```
 
 ---
@@ -90,14 +89,13 @@ Just before the "MCU Input Pin", place a diode in parallel pointing towards "+V"
 Also, just before the "MCU Input Pin", you can place a small capacitor to ground to filter noise if necessary.
 
 ```mermaid
-mindmap TB
+mindmap
   subgraph NPN_Sensor [NPN Inductive Sensor]
     Powering[Powering]
     Output[Output to MCU pin]
     Pullup[Pull-up Resistor]
     DiodeProtection[Diode for Back EMF]
     NoiseFiltering[Capacitor for Noise Filtering]
-  end
 ```
 
 ---
@@ -115,7 +113,7 @@ PWM Control: To control the speed of the motor, a PWM signal can be applied to t
 Mechanical design: Ensure the H-bridge circuit has proper heatsinking as high current applications generate a lot of heat.
 
 ```mermaid
-mindmap TB
+mindmap
   subgraph Motor_Drive [48V 500W DC Motor Drive]
     Hbridge[H-bridge Configuration]
     MOSFETs[MOSFET Selection]
@@ -123,7 +121,6 @@ mindmap TB
     Protection[Flyback Diodes]
     PWM[PWM Control for Speed]
     Heat[Heat Sinking]
-  end
 ```
 
 ---
