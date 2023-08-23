@@ -54,10 +54,8 @@ mindmap
   subgraph DC_Converters [DC Voltage Converter Types]
     subgraph StepDown [Step-Down]
       Buck[Buck Converter]
-    end
     subgraph StepUp [Step-Up]
       Boost[Boost Converter]
-    end
     BuckBoost[Buck-Boost Converter]
     Linear[Linear Voltage Regulators]
     Flyback[Flyback Converter]
