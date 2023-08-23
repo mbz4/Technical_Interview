@@ -1,2 +1,3 @@
-# Pek_Automotive_Tasks
-My solutions to PeK pre-interview assignments
+# Technical Interview Tasks
+My solutions to technical tasks
+
