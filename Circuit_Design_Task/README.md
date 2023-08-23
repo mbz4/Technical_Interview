@@ -147,7 +147,7 @@ Protection: Add a capacitor close to the power pins of the sensor to filter out 
 Interpretation: In software, readings above Vcc/2 imply one direction, while readings below Vcc/2 imply the opposite direction.
 
 ```mermaid
-mindmap TB
+mindmap
   subgraph Analog_Sensor [Ratiometric Bidirectional Analog Sensor]
     Power[Power with MCU's Vcc]
     ADCOutput[Output to MCU ADC]
@@ -155,5 +155,4 @@ mindmap TB
     Buffer[Op-amp Buffer]
     CapacitorProtection[Capacitor for Noise]
     Interpretation[Software Interpretation]
-  end
 ```
