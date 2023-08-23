@@ -51,7 +51,7 @@ A type of DC-DC converter that has both buck and boost operations with non-inver
 
 ```mermaid
 mindmap
-  root((DC_Converters))
+  subgraph DC_Converters [DC Voltage Converter Types]
     subgraph StepDown [Step-Down]
       Buck[Buck Converter]
     end
