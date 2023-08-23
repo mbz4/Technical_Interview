@@ -1,3 +1,4 @@
+#/usr/bin/env python3
 import math
 import matplotlib.pyplot as plt
 import csv
@@ -35,29 +36,44 @@ data = [(1621693264.0155628, 9521, -35074, 3.92, -1.35),
 (1621693270.0862586, 7386, -32103, 4.06, -1.31),
 (1621693270.2752004, 7301, -31996, 4.06, -1.56)]
 
+
+from multiprocessing import Pool
+
+def apply_multiprocessing(func, data):
+    with Pool(processes=8) as pool:  # you can adjust the number of processes as per your CPU cores
+        result = pool.map(func, data)
+    return result
+
+
 def calculate_projection(data):
     projected_points = []
     for point in data:
-        x_mm, y_mm, roll_deg, pitch_deg = point[1], point[2], point[3], point[4]
-        x_offset = 1500 * math.tan(math.radians(roll_deg))
-        y_offset = 1500 * math.tan(math.radians(pitch_deg))
-        x_projected = x_mm + x_offset
+        x_mm, y_mm, roll_deg, pitch_deg = point[1], point[2], point[3], point[4] # unpack data
+        
+        x_offset = 1500 * math.tan(math.radians(roll_deg)) # 1500 mm is the distance from the GNSS module to the center of the vehicle
+        y_offset = 1500 * math.tan(math.radians(pitch_deg)) 
+        
+        x_projected = x_mm + x_offset # add offset to x and y values
         y_projected = y_mm + y_offset
-        projected_points.append((x_projected, y_projected))
+        
+        projected_points.append((x_projected, y_projected)) # add projected point to list
     return projected_points
 
 def calculate_heading(data, projected_points):
-    headings = []
-    for i in range(1, len(data)):
-        delta_x = projected_points[i][0] - projected_points[i-1][0]
-        delta_y = projected_points[i][1] - projected_points[i-1][1]
-        heading = math.degrees(math.atan2(delta_y, delta_x))
-        headings.append(heading)
-    return headings
+    headings = [] # list of headings
+    for i in range(1, len(data)): # start at 1 b/c we need to calculate heading between two points
+        
+        delta_x = projected_points[i][0] - projected_points[i-1][0] # calculate delta x and y
+        delta_y = projected_points[i][1] - projected_points[i-1][1] 
+        
+        heading = math.degrees(math.atan2(delta_y, delta_x)) # calculate heading
+        
+        headings.append(heading) # add heading to list
+    return headings # return list of headings
 
 def calculate_velocity(data):
     velocities = []
-    for i in range(len(data) - 1):  # Skip the last point because there's no next point for it
+    for i in range(len(data) - 1):
         dx = data[i+1][1] - data[i][1]
         dy = data[i+1][2] - data[i][2]
         dt = data[i+1][0] - data[i][0]
@@ -68,27 +84,21 @@ def calculate_velocity(data):
 
 def calculate_norm_velocity(data):
     velocities = []
-    for i in range(len(data) - 1):  # Skip the last point because there's no next point for it
+    for i in range(len(data) - 1):
         dx = data[i+1][1] - data[i][1]
         dy = data[i+1][2] - data[i][2]
         dt = data[i+1][0] - data[i][0]
-        
         vi = np.sqrt(dx**2 + dy**2) / dt
         velocities.append(vi)
-    
-    # Normalize velocities to range [0, 1]
-    max_velocity = max(velocities)
-    normalized_velocities = [v/max_velocity for v in velocities]
-    
-    return normalized_velocities
-
+    max_velocity = max(velocities) # find max vel
+    return [v/max_velocity for v in velocities] # normalize all velocities
 
 def save_to_csv(data, headings, velocities):
     with open('output_data.csv', 'w', newline='') as csvfile:
         fieldnames = ['timestamp', 'x_mm', 'y_mm', 'roll_deg', 'pitch_deg', 'heading_deg', 'velocity']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for i in range(len(data) - 1):  # Again, skipping the last data point
+        for i in range(len(data) - 1):
             writer.writerow({
                 'timestamp': data[i][0],
                 'x_mm': data[i][1],
@@ -96,17 +106,14 @@ def save_to_csv(data, headings, velocities):
                 'roll_deg': data[i][3],
                 'pitch_deg': data[i][4],
                 'heading_deg': headings[i],
-                'velocity': velocities[i]
-            })
+                'velocity': velocities[i]})
 
 
 def plot_quiver(data, headings, velocities):
-    x = [point[1] for point in data[:-1]]  # Skip the last point
-    y = [point[2] for point in data[:-1]]  # Skip the last point
-    
-    # Multiply by normalized velocities to adjust arrow lengths
-    u = np.cos(np.radians(headings)) * velocities
-    v = np.sin(np.radians(headings)) * velocities
+    x = [point[1] for point in data[:-1]]
+    y = [point[2] for point in data[:-1]]
+    u = np.cos(np.radians(headings)) * velocities # convert headings to radians
+    v = np.sin(np.radians(headings)) * velocities # quiver length is proportional to velocity
 
     plt.figure(figsize=(10, 7))
     plt.quiver(x, y, u, v, angles='xy', scale_units='xy', scale=2, color='m', width=0.003, alpha=0.5)
@@ -156,19 +163,16 @@ def plot_headings(headings):
     plt.show()
 
 def plot_velocity_vs_time(data, velocities):
-    # Extracting time information, but remember to exclude the last timestamp since we don't have a velocity for it
-    timestamps = [point[0] for point in data[:-1]]
-    
-    # Convert UNIX timestamps to a human-readable format for better x-axis labels (optional but can be helpful)
-    times = [datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S') for ts in timestamps]
+    timestamps = [point[0] for point in data[:-1]] # exclude last timestamp (no velocity info there)
+    times = [datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S') for ts in timestamps] # UNIX time ==> datetime (x-axis labels)
 
     plt.figure(figsize=(12, 6))
     plt.plot(times, velocities, '-o', color='b', markersize=4)
-    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    plt.xticks(rotation=45) # rotate x-axis labels (might help w/ readability)
     plt.title("Velocity vs. Time")
     plt.xlabel("Time")
     plt.ylabel("Normalized Velocity")
-    plt.tight_layout()  # Adjust layout for better label fitting
+    plt.tight_layout() # prevent x-axis label from being cut off :)
     plt.show()
 
 projected_points = calculate_projection(data)
