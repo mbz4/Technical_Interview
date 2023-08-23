@@ -146,7 +146,7 @@ class DiffGNSSProcessor: # class definition
         ax.set_thetamin(90)
         ax.set_thetamax(180)
     
-    def visualize_data(self, savefig):
+    def visualize_data(self, showfig, savefig):
 
         fig = plt.figure(figsize=(14, 8))
         ax1 = fig.add_subplot(2, 2, 1)
@@ -165,11 +165,12 @@ class DiffGNSSProcessor: # class definition
         manager.window.showMaximized() # maximize the window
         if savefig:
             fig.savefig('analysis.png', dpi=300)
-        plt.show() 
+        if showfig:
+            plt.show() 
     
-    def run(self, savefig=False):
+    def run(self, showfig=True, savefig=False):
         self.process_data()
-        self.visualize_data(savefig)
+        self.visualize_data(showfig, savefig)
 
 if __name__ == "__main__":
-    DiffGNSSProcessor("input_data.csv").run(savefig=True)
+    DiffGNSSProcessor("input_data.csv").run(showfig=True, savefig=True)
