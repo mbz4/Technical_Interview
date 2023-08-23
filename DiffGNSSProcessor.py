@@ -4,7 +4,7 @@ import csv, time, matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 matplotlib.use('Qt5Agg')
-
+plt.style.use('seaborn-v0_8-whitegrid')
 
 def time_it(func):
     def wrapper(self, *args, **kwargs):
@@ -24,26 +24,26 @@ class DiffGNSSProcessor: # class definition
         self.velocities = []
         self.normalized_velocities = []
         self.output_data = []
-
-    def load_data(self, file_path): # load data from csv file
+          
+    def load_data(self, file_path):
         with open(file_path, 'r') as f:
             reader = csv.reader(f)
-            next(reader) # Skip the header row
-            for row in reader: # Convert the data in the row to their appropriate types and add to the data list
-                time_s = float(row[0]) # convert to float (need to perform ops on it later, cant use strings)
-                x_mm = int(row[1]) # convert to int
-                y_mm = int(row[2])
+            next(reader)
+            for row in reader:
+                time_s = float(row[0])
+                x_m = float(int(row[1])) / 1000  # Convert to meters
+                y_m = float(int(row[2])) / 1000  # Convert to meters
                 roll_deg = float(row[3])
                 pitch_deg = float(row[4])
-                data_tuple = (time_s, x_mm, y_mm, roll_deg, pitch_deg) 
-                self.data.append(data_tuple) # add tuple to list     
+                data_tuple = (time_s, x_m, y_m, roll_deg, pitch_deg)
+                self.data.append(data_tuple)
     
-    def calculate_projection(self): # calculate projection of GNSS module on moving plane
+    def calculate_projection(self):
         for point in self.data:
-            x_mm, y_mm, roll_deg, pitch_deg = point[1], point[2], point[3], point[4] # unpack data
-            x_offset = 1500 * np.tan(np.radians(roll_deg)) # 1500 mm is the distance from the GNSS module to the center of the vehicle
-            y_offset = 1500 * np.tan(np.radians(pitch_deg)) 
-            self.projected_points.append((x_mm + x_offset, y_mm + y_offset)) # add offset to x and y values, then add projected point to list
+            x_m, y_m, roll_deg, pitch_deg = point[1], point[2], point[3], point[4]
+            x_offset = 1.5 * np.tan(np.radians(roll_deg))  # 1.5 meters is the distance from the GNSS module to the center of the vehicle
+            y_offset = 1.5 * np.tan(np.radians(pitch_deg))
+            self.projected_points.append((x_m + x_offset, y_m + y_offset))
     
     def calculate_heading(self): # calculate heading between two points
         for i in range(1, len(self.data)): # start at 1 b/c we need to calculate heading between two points
@@ -60,28 +60,28 @@ class DiffGNSSProcessor: # class definition
             self.velocities.append(vi) # add velocity to list
         self.normalized_velocities = [v/(max(self.velocities)) for v in self.velocities] # normalize all velocities
 
-    def save_to_csv(self): # save data to csv file
+    def save_to_csv(self):
         with open('output_data.csv', 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, 
                                     fieldnames = ['timestamp',
-                                                  'x_mm', 
-                                                  'y_mm', 
+                                                  'x_m',   # Changed to meters
+                                                  'y_m',   # Changed to meters
                                                   'roll_deg', 
                                                   'pitch_deg', 
                                                   'heading_deg', 
-                                                  'velocity']) # create writer object
-            writer.writeheader() # write header
+                                                  'velocity'])
+            writer.writeheader()
             for i in range(len(self.data) - 1):
                 writer.writerow({
                     'timestamp': self.data[i][0],
-                    'x_mm': self.data[i][1],
-                    'y_mm': self.data[i][2],
+                    'x_m': self.data[i][1],   # Changed to meters
+                    'y_m': self.data[i][2],   # Changed to meters
                     'roll_deg': self.data[i][3],
                     'pitch_deg': self.data[i][4],
                     'heading_deg': self.headings[i],
-                    'velocity': self.velocities[i]}) # write data to csv file
+                    'velocity': self.velocities[i]})
     
-    @time_it
+    @time_it # measured taking approx 1ms (average) to complete 
     def process_data(self): # process data
         self.data = sorted(self.data, key=lambda x: x[0])  # sort by timestamps
         self.calculate_projection()
@@ -92,17 +92,12 @@ class DiffGNSSProcessor: # class definition
     def plot_quiver(self, ax):
         U = np.cos(np.radians(self.headings))
         V = np.sin(np.radians(self.headings))
-        
-        # Fixing the X and Y extraction
         X = [point[0] for point in self.projected_points]
         Y = [point[1] for point in self.projected_points]
-
-        # Ensure lengths match
-        min_length = min(len(U), len(X))  # get the minimum length
+        min_length = min(len(U), len(X)) # ugly hack to make sure all lists are the same length...
         U, V = U[:min_length], V[:min_length]
         X, Y = X[:min_length], Y[:min_length]
-
-        ax.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=0.009, color='b')
+        ax.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=8, color='b', alpha=0.3, width=0.002, headwidth=3, headlength=4, headaxislength=3.5)
         ax.set_title("Quiver Plot with Projections")
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
@@ -129,14 +124,14 @@ class DiffGNSSProcessor: # class definition
   
     def plot_polar(self, ax):
         angles = np.radians(self.headings)
-        radii = self.normalized_velocities
+        radii = self.velocities
         ax.scatter(angles, radii, color='g', s=5)  # scatter plot with small points
-        ax.set_title("Heading & Velocity")
+        ax.set_title("Heading [°] & Velocity [m/s]")
         ax.grid(True)
-        ax.set_theta_zero_location("N")  # Set 0 degrees to the top
+        ax.set_theta_zero_location("S")  # Set 0 degrees to the top
         ax.set_theta_direction(-1)  # Clockwise direction
     
-    def visualize_data(self):
+    def visualize_data(self, savefig):
 
         fig = plt.figure(figsize=(14, 8))
         ax1 = fig.add_subplot(2, 2, 1)
@@ -149,15 +144,17 @@ class DiffGNSSProcessor: # class definition
         self.plot_time_series(ax3)
         self.plot_velocity_vs_time(ax4)
         
-        plt.draw()
-        manager = plt.get_current_fig_manager()
-        manager.window.showMaximized()
+        plt.draw() # predraw the plot
+        manager = plt.get_current_fig_manager() # get the current figure manager
+        manager.window.showMaximized() # maximize the window
         plt.tight_layout()
-        plt.show()
+        if savefig:
+            fig.savefig('analysis.png', dpi=300)
+        plt.show() 
     
-    def run(self):
+    def run(self, savefig=False):
         self.process_data()
-        self.visualize_data()
+        self.visualize_data(savefig)
 
 if __name__ == "__main__":
-    DiffGNSSProcessor("input_data.csv").run()
+    DiffGNSSProcessor("input_data.csv").run(savefig=False)
