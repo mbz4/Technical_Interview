@@ -24,7 +24,7 @@ Evaluation criterias:
 
 
 <details>
-<summary>## [Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)</summary>
+<summary>Task data (csv)</summary>
 
 | **time_s**         | **x_mm** | **y_mm** | **roll_deg** | **pitch_deg** |
 |--------------------|----------|----------|--------------|---------------|
@@ -63,6 +63,9 @@ Evaluation criterias:
 
 # Solution
 
+<details>
+<summary><h1>DiffGNSSProcessor: how it works, features</h1></summary>
+
 ## DiffGNSSProcessor: how it works, features
 
 - inputs: file path (data), preference to show and/or save resulting figure (arguments)
@@ -87,6 +90,8 @@ Evaluation criterias:
     - matplotlib, 
     - numpy
     - argparse
+</details>
+
 
 ### Setup:
 
