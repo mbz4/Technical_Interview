@@ -24,7 +24,7 @@ Evaluation criterias:
 
 
 <details>
-<summary>Task data (csv)</summary>
+<summary><h2>Task data:</h2> .csv format (<b>toggle me</b>)</summary>
 
 | **time_s**         | **x_mm** | **y_mm** | **roll_deg** | **pitch_deg** |
 |--------------------|----------|----------|--------------|---------------|
@@ -64,9 +64,9 @@ Evaluation criterias:
 # Solution
 
 <details>
-<summary><h1>DiffGNSSProcessor: how it works, features</h1></summary>
+<summary><h1>DiffGNSSProcessor</h1> how it works & features (<b>toggle me</b>)</summary>
 
-## DiffGNSSProcessor: how it works, features
+## How it works
 
 - inputs: file path (data), preference to show and/or save resulting figure (arguments)
 - outputs: data as csv (adds velocity & yaw columns), combined fullscreen windows w/ relevant figures
@@ -130,8 +130,10 @@ options:
 
 ![alt text](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/analysis.png)
 
+<details>
+<summary><h2>Refresher ~ Kalman filters</h2>(<b>toggle me</b>)</summary>
 
-## Refresher ~ Kalman filters
+
 
 ### 1. Guess of system state
 
@@ -180,6 +182,7 @@ $`P_{k|k} = (I - K_k H_k) P_{k|k-1}`$
 Where:  
 - $`P_{k|k}`$: Updated error covariance  
 - $`I`$: Identity matrix  
+</details>
 
 ## Nice to have / Future
 
