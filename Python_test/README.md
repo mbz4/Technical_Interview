@@ -131,8 +131,7 @@ options:
 ![alt text](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/analysis.png)
 
 <details>
-<summary><h2>Refresher ~ Kalman filters</h2>(<b>toggle me</b>)</summary>
-
+<summary><h2>Refresher ~ Kalman filters</h2> (<b>toggle me</b>)</summary>
 
 
 ### 1. Guess of system state
@@ -162,6 +161,7 @@ Where:
 ### 3. Update step
 
 When a new measurement is available, it updates its prediction based on this measurement.
+
 More weight is given to the prediction/measurement depending on specified uncertainties.
 
 **Kalman Gain:**  
