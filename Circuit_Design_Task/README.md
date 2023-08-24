@@ -84,6 +84,7 @@ This will ensure the input reads "high" when the sensor is not activated and "lo
 
 4. Ensure to add protection mechanisms, such as a diode (to prevent back EMF) and a capacitor for noise filtering.
 
+<br>
 
 > a level shifter could be used if MCU digital pin operates at voltages other than supplied
 (note this shows for PNP ind. prox sensor)
