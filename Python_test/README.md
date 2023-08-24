@@ -4,8 +4,28 @@
 ```
 Description of the problem:
 Vehicle has a GNSS module with installation height of 1500mm above the moving plane.
-Vehicle moves forward on rugged terrain. The GNSS position and vehicle orientation is given in
-the following vector:time_s,             x_mm, y_mm,   roll_deg, pitch_deg
+Vehicle moves forward on rugged terrain. The GNSS position and vehicle orientation is given (see links below).
+Positive roll corresponds to the orientation when the right side of the vehicle is being lower than
+the left side. Positive pitch corresponds to the orientation when the front part of the vehicle is
+being lower than the rear part.
+Task:
+1. For each point calculate the projection of the GNSS module post on the moving plane
+2. For each point calculate the vehicles heading (vehicle is moving smoothly straight
+ahead)
+Requirements:
+Problem must be solved using Python 3 language
+Evaluation criterias:
+● Solution correctness and robustness
+● Code cleanness and reusability
+● Problem decomposition approach
+● Data visualization
+```
+[Task instructions (pdf)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/Test%20task%20for%20Python%20language%20skills.pdf)
+
+[Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)
+
+```csv
+time_s, x_mm, y_mm, roll_deg, pitch_deg
 1621693264.0155628, 9521, -35074, 3.92, -1.35
 1621693264.1979840, 9450, -34970, 3.93, -1.22
 1621693264.4237902, 9365, -34853, 3.85, -1.24
@@ -36,20 +56,6 @@ the following vector:time_s,             x_mm, y_mm,   roll_deg, pitch_deg
 1621693269.8621871, 7453, -32193, 4.07, -1.17
 1621693270.0862586, 7386, -32103, 4.06, -1.31
 1621693270.2752004, 7301, -31996, 4.06, -1.56
-Positive roll corresponds to the orientation when the right side of the vehicle is being lower than
-the left side. Positive pitch corresponds to the orientation when the front part of the vehicle is
-being lower than the rear part.
-Task:
-1. For each point calculate the projection of the GNSS module post on the moving plane
-2. For each point calculate the vehicles heading (vehicle is moving smoothly straight
-ahead)
-Requirements:
-Problem must be solved using Python 3 language
-Evaluation criterias:
-● Solution correctness and robustness
-● Code cleanness and reusability
-● Problem decomposition approach
-● Data visualization
 ```
 
 # Solution
