@@ -22,9 +22,8 @@ diagrams are enough.
 
 ---
 ### Disclaimer: 
-- my electronics & ECAD level is very much grassroots, despite many years of studies & tinkering
 - Below is my best attempt at solving the given challenges
-- I am interested in improving my electronics skills
+- I am always dedicated to learning more about electronics
 
 ---
 
@@ -74,17 +73,6 @@ Connect the sensor's power supply to an appropriate voltage (as specified by the
 Connect the output of the sensor to an MCU input pin.
 Use a pull-up resistor between the MCU pin and Vcc. This will ensure the input reads "high" when the sensor is not activated and "low" when it is activated.
 Ensure to add protection mechanisms, such as a diode (to prevent back EMF) and a capacitor for noise filtering.
-
-Connecting a discrete NPN inductive sensor to an MCU:
-
-Label one end as "+V" (this will be your positive voltage supply, typically +5V or +3.3V depending on your sensor and MCU).
-Label the other end as "GND" or "Ground".
-From "+V", draw a line and label it "Vcc of Sensor". This will connect to the positive power input of the sensor.
-From "GND", draw a line and label it "Ground of Sensor".
-The sensor will have an output. From this output, draw a line to an input pin on your MCU. Label this line "MCU Input Pin".
-Between "+V" and "MCU Input Pin", place a resistor. This is your pull-up resistor.
-Just before the "MCU Input Pin", place a diode in parallel pointing towards "+V". This is for back EMF protection.
-Also, just before the "MCU Input Pin", you can place a small capacitor to ground to filter noise if necessary.
 
 
 ---
