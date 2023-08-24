@@ -66,6 +66,7 @@ mindmap
 ## 2. Connecting a discrete NPN inductive sensor to an MCU:
 
 Maybe a simple pull-up resistor would do the job + protection diode & filter caps.
+
 <details><summary><h3>pull-up resistor circuit sketch</h3>  <b>toggle me</b></summary>
 
 ![pull up resistor](https://github.com/mbz4/Technical_Interview/blob/main/Circuit_Design_Task/pull_up.png)
@@ -94,6 +95,8 @@ This will ensure the input reads "high" when the sensor is not activated and "lo
 [source: electronics.stackexchange.com (link)](https://electronics.stackexchange.com/questions/101624/how-to-connect-a-inductive-proximity-sensor-switch-npn-dc6-36v-to-pic18f4550-5v)
 
 </details>
+
+
 
 > if the inductive sensor is not discrete then I think an optocoupler could also work
 
