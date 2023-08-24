@@ -66,8 +66,9 @@ mindmap
 ## 2. Connecting a discrete NPN inductive sensor to an MCU:
 
 Maybe a simple pull-up resistor would do the job + protection diode & filter caps.
-
+<details>
 ![pull up resistor](https://github.com/mbz4/Technical_Interview/blob/main/Circuit_Design_Task/pull_up.png)
+</details>
 
 1. Connect the sensor's power supply to an appropriate voltage (as specified by the sensor).
 
@@ -83,11 +84,17 @@ This will ensure the input reads "high" when the sensor is not activated and "lo
 
 > a level shifter could be used if MCU digital pin operates at voltages other than supplied
 (note this shows for PNP ind. prox sensor)
+<details>
 ![lvl shifter](https://github.com/mbz4/Technical_Interview/blob/main/Circuit_Design_Task/24V_PNP_lvl_shift_5to3_3VMCU.png)
+</details>
 [source: electronics.stackexchange.com (link)](https://electronics.stackexchange.com/questions/101624/how-to-connect-a-inductive-proximity-sensor-switch-npn-dc6-36v-to-pic18f4550-5v)
 
 > if the inductive sensor is not discrete then I think an optocoupler could also work
+<details>
+
 ![pull up resistor](https://github.com/mbz4/Technical_Interview/blob/main/Circuit_Design_Task/npn_opto_12V_to_5V_MCU.png)
+</details>
+
 [source: forum.allaboutcircuits.com (link)](https://forum.allaboutcircuits.com/threads/inductance-proximity-sensor-output-conversion-to-3-3v-logic.160957/)
 
 ---
