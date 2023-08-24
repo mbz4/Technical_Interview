@@ -64,7 +64,7 @@ Evaluation criterias:
 # Solution
 
 <details>
-<summary><h1>DiffGNSSProcessor</h1> how it works & features (<b>toggle me</b>)</summary>
+<summary><h2>DiffGNSSProcessor</h2> how it works & features (<b>toggle me</b>)</summary>
 
 ## How it works
 
