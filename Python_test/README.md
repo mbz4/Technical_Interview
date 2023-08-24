@@ -1,5 +1,5 @@
 
-### Task Instructions
+# Python Language Test
 
 ```
 Description of the problem:
@@ -99,7 +99,7 @@ cd Technical_Interview/Python_test
 ```bash
 python DiffGNSSProcessor.py -h
 
-usage: DiffGNSSProcessor.py [-h] [--file_path FILE_PATH] [--filter] [--noshow] [--save]
+usage: DiffGNSSProcessor.py [-h] [--file_path FILE_PATH] [--noshow] [--save] [--filter] [--process_noise PROCESS_NOISE] [--measurement_noise MEASUREMENT_NOISE]
 
 DiffGNSSProcessor: Process and visualize GNSS data.
 
@@ -107,9 +107,13 @@ options:
   -h, --help            show this help message and exit
   --file_path FILE_PATH
                         Path to data. Default: 'input_data.csv'
-  --filter              Apply a Kalman filter on X, Y, Roll, Pitch data.
   --noshow              Don't show the plot.
   --save                Save plots ('analysis.png') & data ('output_data.csv').
+  --filter              Apply a Kalman filter on X, Y, Roll, Pitch data.
+  --process_noise PROCESS_NOISE
+                        Process noise value.
+  --measurement_noise MEASUREMENT_NOISE
+                        Measurement noise value.
 ```
 
 Resulting plot w/ given task data (no filtering; last uploaded version displayed):
@@ -172,5 +176,6 @@ Where:
 - check data variability
     - if standard deviation exceeds some threshold
         - adjust tuning of process & measurement covariance, then
-            - apply Kalman filter on data
-    
+            - apply filtering on input data
+    - deploy to world (ROS node for straightforward existing platform integration)
+        - proprio- (encoder, dGNSS, IMU) & exteroceptive (OptiTrack, known datum) odometry possible    

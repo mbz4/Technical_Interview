@@ -19,9 +19,11 @@ def time_it(func):
 def parse_args():
     parser = argparse.ArgumentParser(description="DiffGNSSProcessor: Process and visualize GNSS data.")
     parser.add_argument("--file_path", type=str, default="input_data.csv", help="Path to data. Default: 'input_data.csv'")
-    parser.add_argument("--filter", action="store_true", default=False, help="Apply a Kalman filter on X, Y, Roll, Pitch data.")
     parser.add_argument("--noshow", action="store_false", help="Don't show the plot.")
     parser.add_argument("--save", action="store_true", default=False, help="Save plots ('analysis.png') & data ('output_data.csv').")
+    parser.add_argument("--filter", action="store_true", default=False, help="Apply a Kalman filter on X, Y, Roll, Pitch data.")
+    parser.add_argument('--process_noise', type=float, default=1e-5, help='Process noise value.')
+    parser.add_argument('--measurement_noise', type=float, default=1e-2, help='Measurement noise value.')
     return parser.parse_args()
 
 class SimpleKalmanFilter:
@@ -72,8 +74,8 @@ class DiffGNSSProcessor:
         initial_covariance = np.array([[1000, 0], [0, 1000]])
 
         # process_variance, measurement_variance, tune these values to get better results 
-        process_variance = np.array([[1, 0], [0, 1]]) * 0.01 # 0.01
-        measurement_variance = 1 # 10
+        process_variance = np.array([[1, 0], [0, 1]]) * args.process_noise # 0.01
+        measurement_variance = args.measurement_noise # 10, arbitratily chosen ._.
 
         kf_x = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
         kf_y = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
