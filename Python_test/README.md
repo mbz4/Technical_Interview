@@ -20,9 +20,9 @@ Evaluation criterias:
 ● Problem decomposition approach
 ● Data visualization
 ```
-[Task instructions (pdf)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/Test%20task%20for%20Python%20language%20skills.pdf)
+## [Original task instructions (pdf)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/Test%20task%20for%20Python%20language%20skills.pdf)
 
-[Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)
+## [Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)
 
 | **time_s**         | **x_mm** | **y_mm** | **roll_deg** | **pitch_deg** |
 |--------------------|----------|----------|--------------|---------------|
