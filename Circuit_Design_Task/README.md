@@ -86,15 +86,6 @@ Between "+V" and "MCU Input Pin", place a resistor. This is your pull-up resisto
 Just before the "MCU Input Pin", place a diode in parallel pointing towards "+V". This is for back EMF protection.
 Also, just before the "MCU Input Pin", you can place a small capacitor to ground to filter noise if necessary.
 
-```mermaid
-mindmap
-  subgraph NPN_Sensor [NPN Inductive Sensor]
-    Powering[Powering]
-    Output[Output to MCU pin]
-    Pullup[Pull-up Resistor]
-    DiodeProtection[Diode for Back EMF]
-    NoiseFiltering[Capacitor for Noise Filtering]
-```
 
 ---
 
