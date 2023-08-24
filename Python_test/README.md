@@ -63,7 +63,7 @@ time_s, x_mm, y_mm, roll_deg, pitch_deg
 
 - inputs: file path (data), preference to show and/or save resulting figure (arguments)
 - outputs: data as csv (adds velocity & yaw columns), combined fullscreen windows w/ relevant figures
-- basic Kalman filter included
+- ships w/ Adaptive Kalman filter (use flag ```--filter```)
 - processing: ~0.3ms (w/o filter) ~4ms (w/ filter)
 - time complexity w/o filter: O(n) up to O(3n)
 - can save data, plots
@@ -71,7 +71,7 @@ time_s, x_mm, y_mm, roll_deg, pitch_deg
     - yaw (heading) vector w/ projection to moving plane
     - yaw polar plot (radius: normalized velocity)
     - RPY / time line plot
-    - velocity / time line plot
+    - velocity / time line plot (velocity smoothed)
 - abstracted, extendable class structure
     - portable for real time applications (ROS node)
 
@@ -109,10 +109,42 @@ options:
   --save                Save plots ('analysis.png') & data ('output_data.csv').
 ```
 
-Resulting plot w/ given task data:
+Resulting plot w/ given task data (no filtering):
 
 ![alt text](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/analysis.png)
 
+
+### Refresh on basic Kalman filters
+
+```latex
+\textbf{Prediction:}
+
+1. \textbf{State Prediction:}
+\[ \hat{x}_{k|k-1} = F_k \hat{x}_{k-1|k-1} + B_k u_k \]
+
+2. \textbf{Error Covariance Prediction:}
+\[ P_{k|k-1} = F_k P_{k-1|k-1} F_k^T + Q_k \]
+
+\textbf{Update (or Correction):}
+
+1. \textbf{Kalman Gain:}
+\[ K_k = P_{k|k-1} H_k^T (H_k P_{k|k-1} H_k^T + R_k)^{-1} \]
+
+2. \textbf{State Update:}
+\[ \hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k (z_k - H_k \hat{x}_{k|k-1}) \]
+
+3. \textbf{Error Covariance Update:}
+\[ P_{k|k} = (I - K_k H_k) P_{k|k-1} \]
+```
+1. Guess of system state
+It starts with an initial guess of the state of a system and its believed uncertainty.
+
+2. Prediction step
+For each timestep, it makes a prediction about the new/next state based on an internal model. 
+
+3. Update step
+When a new measurement is available, it updates its prediction based on this measurement.
+More weight is given to the prediction/measurement depending on specified uncertainties.
 
 ## Nice to have / Future
 

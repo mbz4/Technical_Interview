@@ -70,9 +70,10 @@ class DiffGNSSProcessor:
     def apply_kalman_filter(self):
         initial_state = np.array([self.data[0][1], 0])
         initial_covariance = np.array([[1000, 0], [0, 1000]])
-        # the noise parameters (process_variance, measurement_variance) were chosen arbitrarily 
-        process_variance = np.array([[1, 0], [0, 1]]) * 0.01
-        measurement_variance = 2
+
+        # process_variance, measurement_variance, tune these values to get better results 
+        process_variance = np.array([[1, 0], [0, 1]]) * 0.01 # 0.01
+        measurement_variance = 1 # 10
 
         kf_x = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
         kf_y = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
@@ -180,7 +181,7 @@ class DiffGNSSProcessor:
         ax.set_title("Roll, Pitch, Yaw / Time")
 
     def plot_velocity_vs_time(self, ax):
-        times = [point[0] for point in self.data] # get times
+        times = [point[0] for point in self.data] # time axis
         smoothed_velocities = np.convolve(self.velocities, np.ones(5)/5, mode='valid') # simple moving average to smoothen the velocities
         truncated_times = times[len(times) - len(smoothed_velocities):] # truncate times to match the length of the smoothed velocities
         ax.plot(truncated_times, smoothed_velocities, label="Velocity", color="purple", alpha=0.5)
@@ -200,8 +201,8 @@ class DiffGNSSProcessor:
         ax.set_theta_zero_location("S")
         ax.set_theta_direction(-1)
         ax.set_rlim(0.4, None)
-        ax.set_thetamin(90)
-        ax.set_thetamax(180)
+        # ax.set_thetamin(90)
+        # ax.set_thetamax(180)
     
     def visualize_data(self, showfig, savefig):
 
@@ -218,11 +219,11 @@ class DiffGNSSProcessor:
         
         plt.subplots_adjust(hspace=0.3, wspace=0.3)
         plt.draw() # predraw the plot
-        manager = plt.get_current_fig_manager() # get the current figure manager
-        manager.window.showMaximized() # maximize the window
         if savefig:
             fig.savefig('analysis.png', dpi=300)
         if showfig:
+            manager = plt.get_current_fig_manager() # get the current figure manager
+            manager.window.showMaximized() # maximize the window
             plt.show() 
     
     def run(self, filterKalman, showfig, savefig):
