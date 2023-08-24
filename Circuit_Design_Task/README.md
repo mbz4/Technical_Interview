@@ -96,7 +96,7 @@ This will ensure the input reads "high" when the sensor is not activated and "lo
 
 </details>
 
-
+<br>
 
 > if the inductive sensor is not discrete then I think an optocoupler could also work
 
