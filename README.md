@@ -4,4 +4,4 @@
 
 ## [Python Language Task](https://github.com/mbz4/Technical_Interview/blob/main/Python_test)
 
-<img alt="Static Badge" src="https://img.shields.io/badge/Python_Task">
+![Static Badge](https://img.shields.io/badge/Python_Task)
