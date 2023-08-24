@@ -66,15 +66,32 @@ Evaluation criterias:
     - velocity / time line plot
 ### Setup:
 
-- uses default dependencies, usually shipped w/ Python 3+: 
+- uses standard Python libraries: 
     - csv, 
     - time, 
     - matplotlib, 
     - numpy
+    - argparse
 - to run:
 
+1. git clone 
 ```bash
-python3 DiffGNSSProcessor.py <file_path> <showfig> <savefig>
+python DiffGNSSProcessor.py <csv data file path> <show figure> <save figure>
+
+
+usage: DiffGNSSProcessor.py [-h] [--file_path FILE_PATH] [--show] [--save]
+
+DiffGNSSProcessor: Process and visualize GNSS data.
+
+options:
+  -h, --help            show this help message and exit
+  --file_path FILE_PATH
+                        Path to the input data CSV file.
+  --show                Whether to show figures or not. Default is True.
+  --save                Whether to save figures or not. Default is False.
 ```
+
+
+Resulting plot w/ given task data:
 
 ![alt text](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/analysis.png)

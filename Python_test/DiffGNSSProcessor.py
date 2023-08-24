@@ -3,6 +3,7 @@
 import csv, time, matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
 matplotlib.use('Qt5Agg')
 plt.style.use('seaborn-v0_8-whitegrid')
 
@@ -14,6 +15,14 @@ def time_it(func):
         print(f'{func.__name__} executed in {1000*(end - start):.03f} ms.')
         return result
     return wrapper
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="DiffGNSSProcessor: Process and visualize GNSS data.")
+    parser.add_argument("--file_path", type=str, default="input_data.csv", help="Path to the input data CSV file.")
+    parser.add_argument("--show", action="store_true", default=True, help="Whether to show figures or not. Default is True.")
+    parser.add_argument("--save", action="store_true", default=False, help="Whether to save figures or not. Default is False.")
+    return parser.parse_args()
+
 
 class DiffGNSSProcessor: # class definition
     def __init__(self, file_path): # constructor
@@ -173,4 +182,5 @@ class DiffGNSSProcessor: # class definition
         self.visualize_data(showfig, savefig)
 
 if __name__ == "__main__":
-    DiffGNSSProcessor("input_data.csv").run(showfig=True, savefig=True)
+    args = parse_args()
+    DiffGNSSProcessor(args.file_path).run(showfig=args.show, savefig=args.save)
