@@ -116,25 +116,25 @@ Resulting plot w/ given task data (no filtering):
 
 ### Refresh on basic Kalman filters
 
+$`\textbf{Prediction:}
 
-$$\textbf{Prediction:}
+1. \textbf{State Prediction:}
+\[ \hat{x}_{k|k-1} = F_k \hat{x}_{k-1|k-1} + B_k u_k \]
 
-1. $$\textbf{State Prediction:}
-$$\[ $$\hat{x}_{k|k-1} = $$F_k $$\hat{x}_{k-1|k-1} + B_k u_k \]
+2. \textbf{Error Covariance Prediction:}
+\[ P_{k|k-1} = F_k P_{k-1|k-1} F_k^T + Q_k \]
 
-2. $$\textbf{Error Covariance Prediction:}
-$$\[ P_{k|k-1} = $$F_k P_{k-1|k-1} $$F_k^T + $$Q_k \]
+\textbf{Update (or Correction):}
 
-$$\textbf{Update (or Correction):}
+1. \textbf{Kalman Gain:}
+\[ K_k = P_{k|k-1} H_k^T (H_k P_{k|k-1} H_k^T + R_k)^{-1} \]
 
-1. $$\textbf{Kalman Gain:}
-$$\[ $$\K_k = $$\P_{k|k-1} $$\H_k^T $$\($$H_k P_{k|k-1} $$H_k^T + $$\R_k)^{-1} \]
+2. \textbf{State Update:}
+\[ \hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k (z_k - H_k \hat{x}_{k|k-1}) \]
 
-2. $$\textbf{State Update:}
-$$\[ $$\hat{x}_{k|k} = $$hat{x}_{k|k-1} + $$K_k ($$z_k - $$H_k $$hat{x}_{k|k-1}) \]
-
-3. $$\textbf{Error Covariance Update:}
-$$\[ $$\P_{k|k} = $$\(I - K_k H_k) $$\P_{k|k-1} \]
+3. \textbf{Error Covariance Update:}
+\[ P_{k|k} = (I - K_k H_k) P_{k|k-1} \]
+$`
 
 1. Guess of system state
 It starts with an initial guess of the state of a system and its believed uncertainty.
