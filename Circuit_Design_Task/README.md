@@ -110,17 +110,6 @@ Protection: Include flyback diodes across each MOSFET to protect against back EM
 PWM Control: To control the speed of the motor, a PWM signal can be applied to the gate driver. The MCU can generate this PWM signal.
 Mechanical design: Ensure the H-bridge circuit has proper heatsinking as high current applications generate a lot of heat.
 
-```mermaid
-mindmap
-  subgraph Motor_Drive [48V 500W DC Motor Drive]
-    Hbridge[H-bridge Configuration]
-    MOSFETs[MOSFET Selection]
-    GateDriver[Gate Driver IC]
-    Protection[Flyback Diodes]
-    PWM[PWM Control for Speed]
-    Heat[Heat Sinking]
-```
-
 ---
 
 ## 4. Connecting a ratiometric bidirectional analog sensor to MCU:
@@ -140,14 +129,3 @@ Signal Conditioning: To improve measurement accuracy, consider adding an op-amp 
 Protection: Add a capacitor close to the power pins of the sensor to filter out noise.
 
 Interpretation: In software, readings above Vcc/2 imply one direction, while readings below Vcc/2 imply the opposite direction.
-
-```mermaid
-mindmap
-  subgraph Analog_Sensor [Ratiometric Bidirectional Analog Sensor]
-    Power[Power with MCU's Vcc]
-    ADCOutput[Output to MCU ADC]
-    Bias[Voltage Bias at Vcc/2]
-    Buffer[Op-amp Buffer]
-    CapacitorProtection[Capacitor for Noise]
-    Interpretation[Software Interpretation]
-```
