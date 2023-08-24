@@ -18,14 +18,34 @@ def time_it(func):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="DiffGNSSProcessor: Process and visualize GNSS data.")
-    parser.add_argument("--file_path", type=str, default="input_data.csv", help="Path to the input data CSV file.")
-    parser.add_argument("--show", action="store_true", default=True, help="Whether to show figures or not. Default is True.")
-    parser.add_argument("--save", action="store_true", default=False, help="Whether to save figures or not. Default is False.")
+    parser.add_argument("--file_path", type=str, default="input_data.csv", help="Path to data. Default: 'input_data.csv'")
+    parser.add_argument("--filter", action="store_true", default=False, help="Apply a Kalman filter on X, Y, Roll, Pitch data.")
+    parser.add_argument("--noshow", action="store_false", help="Don't show the plot.")
+    parser.add_argument("--save", action="store_true", default=False, help="Save plots ('analysis.png') & data ('output_data.csv').")
     return parser.parse_args()
 
+class SimpleKalmanFilter:
+    def __init__(self, initial_state, initial_covariance, process_variance, measurement_variance):
+        self.x = initial_state
+        self.P = initial_covariance
+        self.F = np.array([[1, 1], [0, 1]])
+        self.H = np.array([[1, 0]])
+        self.R = measurement_variance
+        self.Q = process_variance
 
-class DiffGNSSProcessor: # class definition
-    def __init__(self, file_path): # constructor
+    def predict(self):
+        self.x = np.dot(self.F, self.x)
+        self.P = np.dot(np.dot(self.F, self.P), self.F.T) + self.Q
+
+    def update(self, z):
+        y = z - np.dot(self.H, self.x)
+        S = np.dot(np.dot(self.H, self.P), self.H.T) + self.R
+        K = np.dot(np.dot(self.P, self.H.T), np.linalg.inv(S))
+        self.x = self.x + np.dot(K, y)
+        self.P = self.P - np.dot(np.dot(K, self.H), self.P)
+
+class DiffGNSSProcessor:
+    def __init__(self, file_path):
         self.data = []
         self.load_data(file_path)
         self.projected_points = []
@@ -40,13 +60,38 @@ class DiffGNSSProcessor: # class definition
             next(reader)
             for row in reader:
                 time_s = float(row[0])
-                x_m = float(int(row[1])) / 1000  # Convert to meters (makes more sense in this context)
+                x_m = float(int(row[1])) / 1000  # Convert to meters (made more sense in this context)
                 y_m = float(int(row[2])) / 1000
                 roll_deg = float(row[3])
                 pitch_deg = float(row[4])
                 data_tuple = (time_s, x_m, y_m, roll_deg, pitch_deg)
                 self.data.append(data_tuple)
     
+    def apply_kalman_filter(self):
+        initial_state = np.array([self.data[0][1], 0])
+        initial_covariance = np.array([[1000, 0], [0, 1000]])
+        # the noise parameters (process_variance, measurement_variance) were chosen arbitrarily 
+        process_variance = np.array([[1, 0], [0, 1]]) * 0.01
+        measurement_variance = 2
+
+        kf_x = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
+        kf_y = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
+        kf_roll = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
+        kf_pitch = SimpleKalmanFilter(initial_state, initial_covariance, process_variance, measurement_variance)
+        
+        kalman_data = []
+        for point in self.data:
+            kf_x.predict()
+            kf_x.update(np.array([point[1]]))
+            kf_y.predict()
+            kf_y.update(np.array([point[2]]))
+            kf_roll.predict()
+            kf_roll.update(np.array([point[3]]))
+            kf_pitch.predict()
+            kf_pitch.update(np.array([point[4]]))
+            kalman_data.append((point[0], kf_x.x[0], kf_y.x[0], kf_roll.x[0], kf_pitch.x[0]))
+        return kalman_data
+
     def calculate_projection(self):
         for point in self.data:
             x_m, y_m, roll_deg, pitch_deg = point[1], point[2], point[3], point[4]
@@ -91,19 +136,22 @@ class DiffGNSSProcessor: # class definition
                     'velocity': self.velocities[i]})
     
     @time_it # measured taking ~1ms to complete 
-    def process_data(self): # process data
+    def process_data(self, filterKalman, savefig): # process data
         self.data = sorted(self.data, key=lambda x: x[0])  # sort by timestamps
+        if filterKalman:
+            self.data = self.apply_kalman_filter()
         self.calculate_projection()
         self.calculate_heading()
         self.calculate_velocity()
-        self.save_to_csv()
+        if savefig:
+            self.save_to_csv()
 
     def plot_quiver(self, ax):
         U = np.cos(np.radians(self.headings))
         V = np.sin(np.radians(self.headings))
         X = [point[0] for point in self.projected_points]
         Y = [point[1] for point in self.projected_points]
-        min_length = min(len(U), len(X)) # ugly hack to make sure all lists are the same length...
+        min_length = min(len(U), len(X)) # ensure data list length matches...
         U, V = U[:min_length], V[:min_length]
         X, Y = X[:min_length], Y[:min_length]
         ax.quiver(X, Y, U, V, angles='xy', scale_units='xy', scale=8, color='b', alpha=0.5, width=0.0045, headwidth=2.8, headlength=3.8, headaxislength=3.5)
@@ -177,10 +225,10 @@ class DiffGNSSProcessor: # class definition
         if showfig:
             plt.show() 
     
-    def run(self, showfig=True, savefig=False):
-        self.process_data()
+    def run(self, filterKalman, showfig, savefig):
+        self.process_data(filterKalman, savefig)
         self.visualize_data(showfig, savefig)
 
 if __name__ == "__main__":
     args = parse_args()
-    DiffGNSSProcessor(args.file_path).run(showfig=args.show, savefig=args.save)
+    DiffGNSSProcessor(args.file_path).run(filterKalman=args.filter, showfig=args.noshow, savefig=args.save)

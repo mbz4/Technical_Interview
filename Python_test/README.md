@@ -24,7 +24,6 @@ Evaluation criterias:
 
 [Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)
 
-```csv
 time_s, x_mm, y_mm, roll_deg, pitch_deg
 1621693264.0155628, 9521, -35074, 3.92, -1.35
 1621693264.1979840, 9450, -34970, 3.93, -1.22
@@ -56,48 +55,69 @@ time_s, x_mm, y_mm, roll_deg, pitch_deg
 1621693269.8621871, 7453, -32193, 4.07, -1.17
 1621693270.0862586, 7386, -32103, 4.06, -1.31
 1621693270.2752004, 7301, -31996, 4.06, -1.56
-```
+
 
 # Solution
 
-## DiffGNSSProcessor
+## DiffGNSSProcessor: how it works
 
-- inputs: file path, preference to show and/or save resulting figure
-- input data as csv, outputs data as csv (adds velocity & yaw columns)
-- timed, performant (O(n) to O(3n))
-- based on task data, the plots are
+- inputs: file path (data), preference to show and/or save resulting figure (arguments)
+- outputs: data as csv (adds velocity & yaw columns), combined fullscreen windows w/ relevant figures
+- basic Kalman filter included
+- processing: ~0.3ms (w/o filter) ~4ms (w/ filter)
+- time complexity w/o filter: O(n) up to O(3n)
+- can save data, plots
+- based on task context the plots include:
     - yaw (heading) vector w/ projection to moving plane
-    - yaw polar plot (radius = normalized velocity)
+    - yaw polar plot (radius: normalized velocity)
     - RPY / time line plot
     - velocity / time line plot
+- abstracted, extendable class structure
+    - portable for real time applications (ROS node)
+
 ### Setup:
 
-- uses standard Python libraries: 
+- standard Python libraries: 
     - csv, 
     - time, 
     - matplotlib, 
     - numpy
     - argparse
-- to run:
-
-1. git clone 
+- steps to run:
+#### 1. git clone repo
 ```bash
-python DiffGNSSProcessor.py <csv data file path> <show figure> <save figure>
+git clone https://github.com/mbz4/Technical_Interview.git
+```
+#### 2. navigate to app directory
+```bash
+cd Technical_Interview/Python_test
+```
+#### 3. run DiffGNSSProcessor.py
+```bash
+python DiffGNSSProcessor.py -h
 
-
-usage: DiffGNSSProcessor.py [-h] [--file_path FILE_PATH] [--show] [--save]
+usage: DiffGNSSProcessor.py [-h] [--file_path FILE_PATH] [--filter] [--noshow] [--save]
 
 DiffGNSSProcessor: Process and visualize GNSS data.
 
 options:
   -h, --help            show this help message and exit
   --file_path FILE_PATH
-                        Path to the input data CSV file.
-  --show                Whether to show figures or not. Default is True.
-  --save                Whether to save figures or not. Default is False.
+                        Path to data. Default: 'input_data.csv'
+  --filter              Apply a Kalman filter on X, Y, Roll, Pitch data.
+  --noshow              Don't show the plot.
+  --save                Save plots ('analysis.png') & data ('output_data.csv').
 ```
-
 
 Resulting plot w/ given task data:
 
 ![alt text](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/analysis.png)
+
+
+## Nice to have / Future
+
+- check data variability
+    - if standard deviation exceeds some threshold
+        - adjust tuning of process & measurement covariance, then
+            - apply Kalman filter on data
+    
