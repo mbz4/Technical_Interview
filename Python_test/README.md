@@ -22,7 +22,9 @@ Evaluation criterias:
 ```
 ## [Original task instructions (pdf)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/Test%20task%20for%20Python%20language%20skills.pdf)
 
-## [Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)
+
+<details>
+<summary>## [Task data (csv)](https://github.com/mbz4/Technical_Interview/blob/main/Python_test/input_data.csv)</summary>
 
 | **time_s**         | **x_mm** | **y_mm** | **roll_deg** | **pitch_deg** |
 |--------------------|----------|----------|--------------|---------------|
@@ -57,6 +59,7 @@ Evaluation criterias:
 | 1621693270.0862586 | 7386     | -32103   | 4.06         | -1.31         |
 | 1621693270.2752004 | 7301     | -31996   | 4.06         | -1.56         |
 
+</details>
 
 # Solution
 
