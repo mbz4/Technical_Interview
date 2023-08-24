@@ -117,9 +117,11 @@ Resulting plot w/ given task data (no filtering):
 ### Refresh on basic Kalman filters
 
 1. Guess of system state
+
 It starts with an initial guess of the state of a system and its believed uncertainty.
 
 2. Prediction step
+
 For each timestep, it makes a prediction about the new/next state based on an internal model. 
 
 $`1. \textbf{State Prediction:}`$
@@ -129,6 +131,7 @@ $`2. \textbf{Error Covariance Prediction:}`$
 $`P_{k|k-1} = F_k P_{k-1|k-1} F_k^T + Q_k`$
 
 3. Update step
+
 When a new measurement is available, it updates its prediction based on this measurement.
 More weight is given to the prediction/measurement depending on specified uncertainties.
 
