@@ -98,8 +98,8 @@ class DiffGNSSProcessor:
     def calculate_projection(self):
         for point in self.data:
             x_m, y_m, roll_deg, pitch_deg = point[1], point[2], point[3], point[4]
-            x_offset = -1.5 * np.tan(np.radians(roll_deg)) # positive roll: GNSS moves left (negative X dir)
-            y_offset = -1.5 * np.tan(np.radians(pitch_deg)) # positive pitch: GNSS moves back (negative Y dir)
+            x_offset = -1.5 * np.tan(np.radians(roll_deg)) # invert(positive roll: GNSS moves left (negative X dir))
+            y_offset = -1.5 * np.tan(np.radians(pitch_deg)) # invert(positive pitch: GNSS moves back (negative Y dir))
             self.projected_points.append((x_m + x_offset, y_m + y_offset))
     
     def calculate_heading(self): # calculate heading between two points
